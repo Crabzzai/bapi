@@ -1,5 +1,5 @@
 // Export route module
-module.exports = (configs, utils, db, socket) => {
+module.exports = (configs, utils, db, io, socket) => {
     obj = {};
 
     obj.socket = (testArg) => {
