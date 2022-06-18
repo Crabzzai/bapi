@@ -1,0 +1,19 @@
+{
+  "name": "bapi",
+  "version": "1.0.0",
+  "description": "Basic API Structure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Crabzzai",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "mongodb": "^4.7.0",
+    "node-cron": "^3.0.1",
+    "socket.io": "^4.5.1",
+    "uuid": "^8.3.2"
+  }
+}
