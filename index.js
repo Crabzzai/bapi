@@ -101,7 +101,7 @@ app.use(utils.allowCrossDomain); // for allowing cross origin requests
             io.of(namespace).on('connection', async socket => {
                 sockets.forEach(socketPath => {
                     let socketName = utils.convertPathToRouteName(socketPath),
-                        _namespace = _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket,
+                        _namespace = _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).namespace,
                         _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket;
                     if (_namespace === namespace) socket.on(socketName, async (...args) => {await _socket(...args)});
                 });
