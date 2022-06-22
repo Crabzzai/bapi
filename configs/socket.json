@@ -1,0 +1,9 @@
+{
+    "server": {
+        "host": "localhost",
+        "enabled": true
+    },
+    "namespaces": [
+        "/"
+    ]
+}

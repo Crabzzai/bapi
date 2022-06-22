@@ -92,17 +92,21 @@ app.use(utils.allowCrossDomain); // for allowing cross origin requests
     console.log('Routes loaded.');
 
     // Socket.io setup
-    console.log(configs.main.socket_server.enabled ? 'Socket.io enabled!' : 'Socket.io disabled!');
-    if (configs.main.socket_server.enabled) {
+    console.log(configs.socket.server.enabled ? 'Socket.io enabled!' : 'Socket.io disabled!');
+    if (configs.socket.server.enabled) {
         const io = require('socket.io')(server);
         let sockets = getFileLocations(`sockets`, '.js');
-        io.on('connection', async socket => {
-            sockets.forEach(socketPath => {
-                let socketName = utils.convertPathToRouteName(socketPath),
-                    _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket;
-                socket.on(socketName, async (...args) => {await _socket(...args)});
+        let namespaces = configs.socket.namespaces;
+        namespaces.forEach((namespace) => {
+            io.of(namespace).on('connection', async socket => {
+                sockets.forEach(socketPath => {
+                    let socketName = utils.convertPathToRouteName(socketPath),
+                        _namespace = _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket,
+                        _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket;
+                    if (_namespace === namespace) socket.on(socketName, async (...args) => {await _socket(...args)});
+                });
             });
-        });
+        })
     }
 
     // Loading automatic tasks
