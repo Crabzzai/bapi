@@ -2,10 +2,8 @@
 module.exports = (configs, utils, db, io, socket) => {
     obj = {};
 
-    obj.namespace = '/';
-
     obj.socket = (testArg) => {
-        console.log('idk', testArg);
+        console.log('default Socket.io ;D', testArg);
     }
 
     return obj;

@@ -65,6 +65,28 @@ app.use(utils.allowCrossDomain); // for allowing cross origin requests
             database = client.db(configs.database.db_name),
             collections = await database.collections();
 
+            //To make validations for all collections and modify them if they is changed.
+            let schemas = getFileLocations(`utils/schemas`, '.js');
+            let newSchemasExists = false;
+            for (let schema of schemas) {
+                let _schema = require(`${__dirname}/${schema}`)();
+                if (collections.some(col => col.collectionName == _schema.collectionName)) {
+                    database.command({
+                        collMod: _schema.collectionName,
+                        validator: _schema.validator
+                    });
+                } else {
+                    database.createCollection(_schema.collectionName, {
+                        validator: _schema.validator
+                    });
+                    newSchemasExists = true;
+                }
+            }
+            
+            //To get the created collections by schemas, if they doesn't exists in the old collections variable.
+            if (newSchemasExists) collections = await database.collections();
+            console.log('Collections: '+collections.map(x => x.collectionName))
+            
             for (let collection of collections) {
                 db[collection.collectionName] = collection;
             }
@@ -92,18 +114,18 @@ app.use(utils.allowCrossDomain); // for allowing cross origin requests
     console.log('Routes loaded.');
 
     // Socket.io setup
-    console.log(configs.socket.server.enabled ? 'Socket.io enabled!' : 'Socket.io disabled!');
+    console.log(configs.socket.server.enabled ? 'Socket.io is enabled' : 'Socket.io is disabled');
     if (configs.socket.server.enabled) {
         const io = require('socket.io')(server);
-        let sockets = getFileLocations(`sockets`, '.js');
-        let namespaces = configs.socket.namespaces;
+        let sockets = getFileLocations(`sockets`, '.js');        
+        let namespaces = sockets.map(x => utils.convertPathToRouteName(x));
         namespaces.forEach((namespace) => {
             io.of(namespace).on('connection', async socket => {
+                let sockets = fs.readdirSync(`sockets${namespace}`).filter(x => x.endsWith('.js')).map(x => `sockets${namespace}${x}`);
                 sockets.forEach(socketPath => {
-                    let socketName = utils.convertPathToRouteName(socketPath),
-                        _namespace = _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).namespace,
-                        _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket;
-                    if (_namespace === namespace) socket.on(socketName, async (...args) => {await _socket(...args)});
+                    let socketFile = socketPath.split('/').pop()
+                    let _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket;
+                    socket.on(socketFile === 'index.js' ? '/' : socketFile.slice(0, -3), async (...args) => {await _socket(...args)});
                 });
             });
         })

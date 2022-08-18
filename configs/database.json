@@ -3,6 +3,6 @@
     "port": 27017,
     "username": "",
     "password": "",
-    "db_name": "",
-    "enabled": false
+    "db_name": "test",
+    "enabled": true
 }
