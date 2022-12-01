@@ -1,8 +1,0 @@
-{
-    "host": "localhost",
-    "port": 27017,
-    "username": "",
-    "password": "",
-    "db_name": "test",
-    "enabled": true
-}
