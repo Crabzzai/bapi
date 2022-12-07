@@ -1,0 +1,8 @@
+{
+    "host": "localhost",
+    "port": 27017,
+    "username": "johndoe",
+    "password": "johndoe123",
+    "db_name": "myawesomedb",
+    "enabled": true
+}

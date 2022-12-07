@@ -121,11 +121,13 @@ app.use(utils.allowCrossDomain); // for allowing cross origin requests
         let namespaces = sockets.map(x => utils.convertPathToRouteName(x));
         namespaces.forEach((namespace) => {
             io.of(namespace).on('connection', async socket => {
-                let sockets = fs.readdirSync(`sockets${namespace}`).filter(x => x.endsWith('.js')).map(x => `sockets${namespace}${x}`);
                 sockets.forEach(socketPath => {
                     let socketFile = socketPath.split('/').pop()
-                    let _socket = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket).socket;
-                    socket.on(socketFile === 'index.js' ? '/' : socketFile.slice(0, -3), async (...args) => {await _socket(...args)});
+                    let socketObj = require(`${__dirname}/${socketPath}`)(configs, utils, db, io, socket);
+                    socket.on(socketFile === 'index.js' && utils.convertPathToRouteName(socketPath) === namespace ? '/' : socketFile.slice(0, -3), async (...args) => {
+                        if (socketObj.auth && !utils['auth.standardSocket'](configs, utils, db, io, socket)) return;
+                        await socketObj.socket(...args);
+                    });
                 });
             });
         })
